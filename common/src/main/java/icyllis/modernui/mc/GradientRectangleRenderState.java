@@ -23,14 +23,14 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import icyllis.modernui.graphics.MathUtil;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * The vanilla {@link net.minecraft.client.gui.render.state.ColoredRectangleRenderState}
+ * The vanilla
  * only allows integer coordinates and vertical gradients, this class removes these restrictions.
  *
  * @since 3.12

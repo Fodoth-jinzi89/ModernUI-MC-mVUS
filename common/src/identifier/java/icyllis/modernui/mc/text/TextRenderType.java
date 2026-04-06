@@ -19,7 +19,10 @@
 package icyllis.modernui.mc.text;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -48,10 +51,13 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static icyllis.modernui.mc.ModernUIMod.LOGGER;
 import static icyllis.modernui.mc.text.TextLayoutEngine.MARKER;
+
+
 
 /**
  * Fast and modern text render type.
@@ -79,7 +85,9 @@ public final class TextRenderType {
             .withUniform("Projection", UniformType.UNIFORM_BUFFER)
             .withSampler("Sampler0")
             .withSampler("Sampler2")
-            .withBlend(BlendFunction.TRANSLUCENT)
+            .withColorTargetState(
+                    new ColorTargetState(Optional.of(BlendFunction.TRANSLUCENT), ColorTargetState.WRITE_ALL)
+            )
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, VertexFormat.Mode.QUADS)
             .build();
 
@@ -90,20 +98,32 @@ public final class TextRenderType {
             .withUniform("Projection", UniformType.UNIFORM_BUFFER)
             .withSampler("Sampler0")
             .withSampler("Sampler2")
-            .withBlend(BlendFunction.TRANSLUCENT)
+            .withColorTargetState(
+                    new ColorTargetState(Optional.of(BlendFunction.TRANSLUCENT), ColorTargetState.WRITE_ALL)
+            )
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, VertexFormat.Mode.QUADS)
             .buildSnippet();
 
     public static final RenderPipeline PIPELINE_SDF_FILL = withFragmentShader(
             withLocation(RenderPipeline.builder(PIPELINE_SDF_SNIPPET), "pipeline/modern_text_sdf_fill"),
             "core/rendertype_modern_text_sdf_fill")
-            .withDepthBias(-1.0F, -10.0F)
+            .withDepthStencilState(new DepthStencilState(
+                    CompareOp.EQUAL, // 深度测试方式，对应原来的默认
+                    true,             // 是否写深度缓冲
+                    -1.0F,            // depthBiasScaleFactor
+                    -10.0F            // depthBiasConstant
+            ))
             .build();
 
     public static final RenderPipeline PIPELINE_SDF_STROKE = withFragmentShader(
             withLocation(RenderPipeline.builder(PIPELINE_SDF_SNIPPET), "pipeline/modern_text_sdf_stroke"),
             "core/rendertype_modern_text_sdf_stroke")
-            .withDepthBias(-1.0F, -10.0F)
+            .withDepthStencilState(new DepthStencilState(
+                    CompareOp.EQUAL, // 深度测试方式，对应原来的默认
+                    true,             // 是否写深度缓冲
+                    -1.0F,            // depthBiasScaleFactor
+                    -10.0F            // depthBiasConstant
+            ))
             .build();
 
     private static volatile RenderPipeline sCurrentPipelineSDFFill = PIPELINE_SDF_FILL;
@@ -113,13 +133,23 @@ public final class TextRenderType {
     public static final RenderPipeline PIPELINE_SDF_FILL_SMART = withFragmentShader(
             withLocation(RenderPipeline.builder(PIPELINE_SDF_SNIPPET), "pipeline/modern_text_sdf_fill_smart"),
             "core/rendertype_modern_text_sdf_fill_400")
-            .withDepthBias(-1.0F, -10.0F)
+            .withDepthStencilState(new DepthStencilState(
+                    CompareOp.EQUAL, // 深度测试方式，对应原来的默认
+                    true,             // 是否写深度缓冲
+                    -1.0F,            // depthBiasScaleFactor
+                    -10.0F            // depthBiasConstant
+            ))
             .build();
 
     public static final RenderPipeline PIPELINE_SDF_STROKE_SMART = withFragmentShader(
             withLocation(RenderPipeline.builder(PIPELINE_SDF_SNIPPET), "pipeline/modern_text_sdf_stroke_smart"),
             "core/rendertype_modern_text_sdf_stroke_400")
-            .withDepthBias(-1.0F, -10.0F)
+            .withDepthStencilState(new DepthStencilState(
+                    CompareOp.EQUAL, // 深度测试方式，对应原来的默认
+                    true,             // 是否写深度缓冲
+                    -1.0F,            // depthBiasScaleFactor
+                    -10.0F            // depthBiasConstant
+            ))
             .build();
 
     /*public static final ShaderProgram SHADER_NORMAL = new ShaderProgram(

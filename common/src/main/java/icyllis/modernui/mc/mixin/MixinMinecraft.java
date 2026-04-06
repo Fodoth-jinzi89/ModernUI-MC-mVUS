@@ -51,8 +51,8 @@ public abstract class MixinMinecraft {
     @Inject(method = "setScreen", at = @At(value = "FIELD",
             target = "Lnet/minecraft/client/Minecraft;screen:Lnet/minecraft/client/gui/screens/Screen;",
             opcode = Opcodes.PUTFIELD))
-    private void onSetScreen(Screen guiScreen, CallbackInfo ci) {
-        MuiModApi.dispatchOnScreenChange(screen, guiScreen);
+    private void onSetScreen(Screen screen, CallbackInfo ci) {
+        MuiModApi.dispatchOnScreenChange(this.screen, screen);
     }
 
     @Inject(method = "onGameLoadFinished", at = @At("HEAD"))
@@ -110,7 +110,7 @@ public abstract class MixinMinecraft {
         }
     }*/
 
-    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;shutdownExecutors()V"))
     private void onClose(CallbackInfo ci) {
         UIManager.destroy();
     }

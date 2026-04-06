@@ -710,7 +710,6 @@ public class TextLayoutProcessor {
      * @param start start index (inclusive) of the text
      * @param limit end index (exclusive) of the text
      * @param isRtl layout direction
-     * @see #handleStyleRun(char[], int, int, boolean, int, Identifier)
      */
     private void handleBidiRun(@Nonnull char[] text, int start, int limit, boolean isRtl) {
         assert start < limit;

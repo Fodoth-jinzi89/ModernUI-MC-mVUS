@@ -25,6 +25,7 @@ import icyllis.modernui.graphics.text.Font;
 import icyllis.modernui.util.SparseArray;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,7 +64,7 @@ public class TextLayout {
         }
 
         @Override
-        public float drawText(@Nonnull Matrix4f matrix, @Nonnull MultiBufferSource source,
+        public float drawText(@Nonnull Matrix4fc matrix, @Nonnull MultiBufferSource source,
                               float x, float top, int r, int g, int b, int a, boolean isShadow,
                               int preferredMode, boolean polygonOffset, float uniformScale,
                               int bgColor, int packedLight) {
@@ -71,7 +72,7 @@ public class TextLayout {
         }
 
         @Override
-        public void drawTextOutline(@Nonnull Matrix4f matrix, @Nonnull MultiBufferSource source, float x, float top,
+        public void drawTextOutline(@Nonnull Matrix4fc matrix, @Nonnull MultiBufferSource source, float x, float top,
                                     int r, int g, int b, int a, int packedLight) {
             // noop
         }
@@ -319,10 +320,10 @@ public class TextLayout {
      * @param polygonOffset polygon offset layering requested?
      * @param uniformScale  additional scale factor if uniform scale
      * @param bgColor       the background color of the text in 0xAARRGGBB format
-     * @param packedLight   see {@link net.minecraft.client.renderer.LightTexture}
+     * @param packedLight
      * @return the total advance, always positive
      */
-    public float drawText(@Nonnull final Matrix4f matrix,
+    public float drawText(@Nonnull final Matrix4fc matrix,
                           @Nonnull final MultiBufferSource source,
                           float x, float top,
                           int r, int g, int b, final int a,
@@ -575,10 +576,10 @@ public class TextLayout {
      * @param g           the default outline green value (0...255)
      * @param b           the default outline blue value (0...255)
      * @param a           the alpha value (0...255)
-     * @param packedLight see {@link net.minecraft.client.renderer.LightTexture}
+     * @param packedLight
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public void drawTextOutline(@Nonnull Matrix4f matrix,
+    public void drawTextOutline(@Nonnull Matrix4fc matrix,
                                 @Nonnull MultiBufferSource source,
                                 final float x, final float top,
                                 int r, int g, int b, int a,

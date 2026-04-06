@@ -33,33 +33,33 @@ import java.text.StringCharacterIterator;
 public class MixinStringSplitter {
 
     @Inject(method = "getWordPosition", at = @At("HEAD"), cancellable = true)
-    private static void getWordPosition(String value, int dir, int cursor, boolean withEndSpace,
+    private static void getWordPosition(String text, int dir, int from, boolean stripSpaces,
                                         CallbackInfoReturnable<Integer> cir) {
         if (dir == -1 || dir == 1) {
             int offset;
-            if (withEndSpace) {
+            if (stripSpaces) {
                 WordIterator wordIterator = new WordIterator();
-                wordIterator.setCharSequence(value, cursor, cursor);
+                wordIterator.setCharSequence(text, from, from);
                 if (dir == -1) {
-                    offset = wordIterator.preceding(cursor);
+                    offset = wordIterator.preceding(from);
                 } else {
-                    offset = wordIterator.following(cursor);
+                    offset = wordIterator.following(from);
                 }
             } else {
                 BreakIterator wordIterator = BreakIterator.getWordInstance(
                         ModernUI.getSelectedLocale()
                 );
-                wordIterator.setText(new StringCharacterIterator(value, cursor));
+                wordIterator.setText(new StringCharacterIterator(text, from));
                 if (dir == -1) {
-                    offset = wordIterator.preceding(cursor);
+                    offset = wordIterator.preceding(from);
                 } else {
-                    offset = wordIterator.following(cursor);
+                    offset = wordIterator.following(from);
                 }
             }
             if (offset != BreakIterator.DONE) {
                 cir.setReturnValue(offset);
             } else {
-                cir.setReturnValue(cursor);
+                cir.setReturnValue(from);
             }
         }
     }

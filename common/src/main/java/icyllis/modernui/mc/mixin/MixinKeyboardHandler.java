@@ -30,8 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinKeyboardHandler {
 
     @Inject(method = "keyPress", at = @At("HEAD"))
-    private void onKeyInputPost(long window, int action, KeyEvent event,
+    private void onKeyInputPost(long handle, int action, KeyEvent event,
                                 CallbackInfo ci) {
-        MuiModApi.dispatchOnPreKeyInput(window, event.key(), event.scancode(), action, event.modifiers());
+        MuiModApi.dispatchOnPreKeyInput(handle, event.key(), event.scancode(), action, event.modifiers());
     }
 }

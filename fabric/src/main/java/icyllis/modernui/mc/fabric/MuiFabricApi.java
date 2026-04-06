@@ -26,19 +26,20 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import icyllis.modernui.fragment.Fragment;
 import icyllis.modernui.mc.*;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Rarity;
+import org.jetbrains.annotations.UnknownNullability;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -121,17 +122,17 @@ public final class MuiFabricApi extends MuiModApi {
     }
 
     @Override
-    public void submitGuiElementRenderState(GuiGraphics graphics, GuiElementRenderState renderState) {
-        graphics.guiRenderState.submitGuiElement(renderState);
+    public void submitGuiElementRenderState(GuiGraphicsExtractor graphics, GuiElementRenderState renderState) {
+        graphics.guiRenderState.addGuiElement(renderState);
     }
 
     @Override
-    public void submitPictureInPictureRenderState(GuiGraphics graphics, PictureInPictureRenderState renderState) {
-        graphics.guiRenderState.submitPicturesInPictureState(renderState);
+    public void submitPictureInPictureRenderState(GuiGraphicsExtractor graphics, PictureInPictureRenderState renderState) {
+        graphics.guiRenderState.addPicturesInPictureState(renderState);
     }
 
     @Override
-    public ScreenRectangle peekScissorStack(GuiGraphics graphics) {
+    public ScreenRectangle peekScissorStack(@UnknownNullability GuiGraphicsExtractor graphics) {
         return graphics.scissorStack.peek();
     }
 

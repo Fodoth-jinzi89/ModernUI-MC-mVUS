@@ -19,7 +19,7 @@
 package icyllis.modernui.mc.mixin;
 
 import icyllis.modernui.mc.BlurHandler;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,15 +46,15 @@ public class MixinScreen {
     protected Minecraft minecraft;*/
 
     @Redirect(
-            method = "renderTransparentBackground",
+            method = "extractTransparentBackground",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;fillGradient(IIIIII)V"
+                    target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;fillGradient(IIIIII)V"
             )
     )
-    private void renderBackgroundInWorld(@Nonnull GuiGraphics gr, int x1, int y1,
-                                         int x2, int y2, int color1, int color2) {
-        BlurHandler.INSTANCE.drawScreenBackground(gr, x1, y1, x2, y2);
+    private void renderBackgroundInWorld(@Nonnull GuiGraphicsExtractor gr, int x0, int y0,
+                                         int x1, int y1, int col1, int col2) {
+        BlurHandler.INSTANCE.drawScreenBackground(gr, x0, y0, x1, y1);
     }
 
     /*@Redirect(

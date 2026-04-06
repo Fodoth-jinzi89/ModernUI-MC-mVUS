@@ -55,10 +55,9 @@ import net.minecraft.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.BlitRenderState;
-import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
 import net.minecraft.client.player.LocalPlayer;
@@ -115,9 +114,6 @@ public abstract class UIManager implements LifecycleOwner {
 
     // minecraft
     protected final Minecraft minecraft = Minecraft.getInstance();
-
-    // minecraft window
-    protected final Window mWindow = minecraft.getWindow();
 
     private final PoseStack mEmptyPoseStack = new PoseStack();
 
@@ -280,7 +276,7 @@ public abstract class UIManager implements LifecycleOwner {
                     continue;
                 } else {
                     minecraft.schedule(this::dump);
-                    minecraft.delayCrashRaw(CrashReport.forThrowable(e, "Exception on UI thread"));
+                    minecraft.delayCrash(CrashReport.forThrowable(e, "Exception on UI thread"));
                 }
             }
             break;
@@ -445,7 +441,10 @@ public abstract class UIManager implements LifecycleOwner {
         //mDecor.setLayoutTransition(new LayoutTransition());
 
         mRoot.setView(mDecor);
-        resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+        if (minecraft.getWindow() != null) {
+            resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+        }
+
 
         mDecor.getViewTreeObserver().addOnScrollChangedListener(this::scheduleHoverMoveForScroll);
 
@@ -539,9 +538,9 @@ public abstract class UIManager implements LifecycleOwner {
     public void onHoverMove(boolean natural) {
         final long now = Core.timeNanos();
         float x = (float) (minecraft.mouseHandler.xpos() *
-                mWindow.getWidth() / mWindow.getScreenWidth());
+                minecraft.getWindow().getWidth() / minecraft.getWindow().getScreenWidth());
         float y = (float) (minecraft.mouseHandler.ypos() *
-                mWindow.getHeight() / mWindow.getScreenHeight());
+                minecraft.getWindow().getHeight() / minecraft.getWindow().getScreenHeight());
         MotionEvent event = MotionEvent.obtain(now, MotionEvent.ACTION_HOVER_MOVE,
                 x, y, 0);
         mRoot.enqueueInputEvent(event);
@@ -556,7 +555,7 @@ public abstract class UIManager implements LifecycleOwner {
     public void onScroll(double scrollX, double scrollY) {
         if (mScreen != null) {
             final long now = Core.timeNanos();
-            final Window window = mWindow;
+            final Window window = minecraft.getWindow();
             final MouseHandler mouseHandler = minecraft.mouseHandler;
             float x = (float) (mouseHandler.xpos() *
                     window.getWidth() / window.getScreenWidth());
@@ -584,9 +583,9 @@ public abstract class UIManager implements LifecycleOwner {
             //ModernUI.LOGGER.info(MARKER, "Button: {} {} {}", event.getButton(), event.getAction(), event.getMods());
             final long now = Core.timeNanos();
             float x = (float) (minecraft.mouseHandler.xpos() *
-                    mWindow.getWidth() / mWindow.getScreenWidth());
+                    minecraft.getWindow().getWidth() / minecraft.getWindow().getScreenWidth());
             float y = (float) (minecraft.mouseHandler.ypos() *
-                    mWindow.getHeight() / mWindow.getScreenHeight());
+                    minecraft.getWindow().getHeight() / minecraft.getWindow().getScreenHeight());
             int actionButton = 1 << button;
             int buttonState = mButtonState;
             if (action == GLFW_PRESS) {
@@ -633,7 +632,7 @@ public abstract class UIManager implements LifecycleOwner {
                 }
             }
         }
-        if (!ModernUIMod.isDeveloperMode() || !KeyCompat.isControlDown(mWindow) || !KeyCompat.isShiftDown(mWindow)) {
+        if (!ModernUIMod.isDeveloperMode() || !KeyCompat.isControlDown(minecraft.getWindow()) || !KeyCompat.isShiftDown(minecraft.getWindow())) {
             return;
         }
         if (action == GLFW_PRESS) {
@@ -961,7 +960,7 @@ public abstract class UIManager implements LifecycleOwner {
         if (minecraft.gameRenderer.currentPostEffect() == null) {
             LOGGER.info(MARKER, "Load post-processing effect");
             final Object effect;
-            if (KeyCompat.isKeyDown(mWindow, GLFW_KEY_RIGHT_SHIFT)) {
+            if (KeyCompat.isKeyDown(minecraft.getWindow(), GLFW_KEY_RIGHT_SHIFT)) {
                 effect = ModernUIMod.location("grayscale");
             } else {
                 effect = ModernUIMod.location("radial_blur");
@@ -986,7 +985,7 @@ public abstract class UIManager implements LifecycleOwner {
 
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }*/
-            minecraft.gui.getChat().addMessage(Component.literal(str).withStyle(ChatFormatting.GRAY));
+            minecraft.gui.getChat().addClientSystemMessage(Component.literal(str).withStyle(ChatFormatting.GRAY));
         }
         LOGGER.info(MARKER, str);
     }
@@ -1071,7 +1070,7 @@ public abstract class UIManager implements LifecycleOwner {
     }
 
     @RenderThread
-    public void render(@Nonnull GuiGraphics gr, int mouseX, int mouseY, float deltaTick) {
+    public void render(@Nonnull GuiGraphicsExtractor gr, int mouseX, int mouseY, float deltaTick) {
         if (mNoRender) {
             /*if (mScreen != null) {
                 String error = Language.getInstance().getOrDefault("error.modernui.gl_caps");
@@ -1195,8 +1194,8 @@ public abstract class UIManager implements LifecycleOwner {
                                 mLayerTextureView,
                                 SamplerCompat.clampToEdge(FilterMode.NEAREST)
                         ),
-                        new Matrix3x2f().scale(1.0F / mWindow.getGuiScale()),
-                        0, 0, mWindow.getWidth(), mWindow.getHeight(),
+                        new Matrix3x2f().scale(1.0F / minecraft.getWindow().getGuiScale()),
+                        0, 0, minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(),
                         // since the projection is flipped, we need to flip the texture coordinates
                         0.0F, 1.0F, 1.0F, 0.0F,
                         ~0,
@@ -1208,7 +1207,7 @@ public abstract class UIManager implements LifecycleOwner {
 
         if (mScreen != null) {
             for (var handler : mRoot.mRawDrawHandlers) {
-                handler.render(gr, mouseX, mouseY, deltaTick, mWindow);
+                handler.render(gr, mouseX, mouseY, deltaTick, minecraft.getWindow());
             }
         }
 
@@ -1279,18 +1278,18 @@ public abstract class UIManager implements LifecycleOwner {
         mRoot.mHandler.post(this::restoreLayoutTransition);
         mRoot.mRawDrawHandlers.clear();
         mScreen = null;
-        glfwSetCursor(mWindow.handle(), MemoryUtil.NULL);
+        glfwSetCursor(minecraft.getWindow().handle(), MemoryUtil.NULL);
     }
 
     public void drawExtTooltip(ItemStack itemStack,
-                               GuiGraphics graphics,
+                               GuiGraphicsExtractor graphics,
                                List<ClientTooltipComponent> components,
                                int x, int y, Font font,
                                int screenWidth, int screenHeight,
                                ClientTooltipPositioner positioner,
                                Object tooltipStyle) {
         // screen coordinates to pixels for rendering
-        final Window window = mWindow;
+        final Window window = minecraft.getWindow();
         final MouseHandler mouseHandler = minecraft.mouseHandler;
         final double cursorX = mouseHandler.xpos() *
                 (double) window.getGuiScaledWidth() / (double) window.getScreenWidth();
@@ -1333,12 +1332,17 @@ public abstract class UIManager implements LifecycleOwner {
     public void renderAbove(GuiRenderState guiRenderState) {
         if (minecraft.isRunning() && mRunning &&
                 mScreen == null && minecraft.getOverlay() == null) {
-            // Render the UI above everything
+
+            var window = minecraft.getWindow();
+            if (window == null) {
+                return;
+            }
+
             render(GuiGraphicsCompat.create(
                     minecraft,
                     guiRenderState,
-                    mWindow.getGuiScaledWidth(),
-                    mWindow.getGuiScaledHeight()
+                    window.getGuiScaledWidth(),
+                    window.getGuiScaledHeight()
             ), 0, 0, 0);
         }
     }
@@ -1415,7 +1419,7 @@ public abstract class UIManager implements LifecycleOwner {
                     sb.appendCodePoint(cp++);
                 }
                 mTestCodepoint = end;
-                minecraft.gui.getChat().addMessage(Component.literal(sb.toString()));
+                minecraft.gui.getChat().addClientSystemMessage(Component.literal(sb.toString()));
             }
         }
     }
@@ -1666,7 +1670,7 @@ public abstract class UIManager implements LifecycleOwner {
 
         @MainThread
         protected void applyPointerIcon(int pointerType) {
-            minecraft.schedule(() -> glfwSetCursor(mWindow.handle(),
+            minecraft.schedule(() -> glfwSetCursor(minecraft.getWindow().handle(),
                     PointerIcon.getSystemIcon(pointerType).getHandle()));
         }
 

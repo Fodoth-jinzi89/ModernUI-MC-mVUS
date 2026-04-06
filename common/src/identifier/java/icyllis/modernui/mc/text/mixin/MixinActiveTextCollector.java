@@ -20,7 +20,8 @@ package icyllis.modernui.mc.text.mixin;
 
 import icyllis.modernui.mc.text.TextLayoutEngine;
 import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.render.state.GuiTextRenderState;
+
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
 import net.minecraft.network.chat.Style;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
 
 /**
  * 1.21.11+: Chat (and other UI text) hit-testing uses {@link ActiveTextCollector#findElementUnderCursor} which
- * transforms the screen point with {@link GuiTextRenderState#pose} and then walks active areas via
+ * transforms the screen point with and then walks active areas via
  * {@link net.minecraft.client.gui.Font.PreparedText#visit}.
  * <p>
  * Modern Text Engine may strip pose translation (and bake it into x/y) for rendering precision/performance, which

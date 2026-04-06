@@ -34,10 +34,10 @@ import icyllis.modernui.mc.mixin.MixinChatFormatting;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.GameRenderer;
@@ -94,7 +94,7 @@ public abstract class MuiModApi {
     public interface OnWindowResizeListener {
 
         /**
-         * Invoked at the beginning of {@link Minecraft#resizeDisplay()}.
+         * Invoked at the beginning of .
          * Gui scale algorithm is replaced by Modern UI, see {@link #calcGuiScales(Window)}.
          *
          * @param width       framebuffer width of the window in pixels
@@ -409,12 +409,12 @@ public abstract class MuiModApi {
 
     public abstract GpuTexture getRealGpuTexture(GpuTexture faker);
 
-    public abstract void submitGuiElementRenderState(GuiGraphics graphics, GuiElementRenderState renderState);
+    public abstract void submitGuiElementRenderState(GuiGraphicsExtractor graphics, GuiElementRenderState renderState);
 
-    public abstract void submitPictureInPictureRenderState(GuiGraphics graphics, PictureInPictureRenderState renderState);
+    public abstract void submitPictureInPictureRenderState(GuiGraphicsExtractor graphics, PictureInPictureRenderState renderState);
 
     @Nullable
-    public abstract ScreenRectangle peekScissorStack(GuiGraphics graphics);
+    public abstract ScreenRectangle peekScissorStack(GuiGraphicsExtractor graphics);
 
     public abstract <RT> RT createRenderType(String name, int bufferSize,
                                             boolean affectsCrumbling, boolean sortOnUpload,
@@ -462,7 +462,7 @@ public abstract class MuiModApi {
     }
 
     /**
-     * Registers a callback to be invoked at the beginning of {@link Minecraft#resizeDisplay()}.
+     * Registers a callback to be invoked at the beginning of .
      *
      * @param listener the listener to register
      * @see OnWindowResizeListener

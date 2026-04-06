@@ -1021,7 +1021,7 @@ public class PreferencesFragment extends Fragment {
                     // ensure it's applied
                     if ((int) minecraft.getWindow().getGuiScale() !=
                             minecraft.getWindow().calculateScale(newValue, false)) {
-                        minecraft.resizeDisplay();
+                        minecraft.resizeGui();
                     }
                     minecraft.options.save();
                 });

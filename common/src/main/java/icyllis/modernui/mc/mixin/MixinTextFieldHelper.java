@@ -31,21 +31,21 @@ public class MixinTextFieldHelper {
             method = "moveByChars(IZ)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/Util;offsetByCodepoints(Ljava/lang/String;II)I"
+                    target = "Lnet/minecraft/util/Util;offsetByCodepoints(Ljava/lang/String;II)I"
             )
     )
-    private int onMoveByChars(String value, int cursor, int dir) {
-        return MuiModApi.offsetByGrapheme(value, cursor, dir);
+    private int onMoveByChars(String input, int pos, int offset) {
+        return MuiModApi.offsetByGrapheme(input, pos, offset);
     }
 
     @Redirect(
             method = "removeCharsFromCursor",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/Util;offsetByCodepoints(Ljava/lang/String;II)I"
+                    target = "Lnet/minecraft/util/Util;offsetByCodepoints(Ljava/lang/String;II)I"
             )
     )
-    private int onRemoveCharsFromCursor(String value, int cursor, int dir) {
-        return MuiModApi.offsetByGrapheme(value, cursor, dir);
+    private int onRemoveCharsFromCursor(String input, int pos, int offset) {
+        return MuiModApi.offsetByGrapheme(input, pos, offset);
     }
 }

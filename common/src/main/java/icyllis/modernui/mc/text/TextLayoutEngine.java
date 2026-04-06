@@ -745,7 +745,7 @@ public class TextLayoutEngine extends FontResourceManager
             implements DependencySorter.Entry<Object> {
         final Object name;
         /**
-         * We load font families other than {@link #isUnicodeFont(Identifier)}.
+         * We load font families other than .
          * <p>
          * Either FontFamily or Identifier (reference).
          */

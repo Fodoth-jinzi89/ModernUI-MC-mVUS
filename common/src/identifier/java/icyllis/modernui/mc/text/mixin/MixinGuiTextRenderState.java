@@ -26,7 +26,8 @@ import icyllis.modernui.mc.text.TextLayoutEngine;
 import icyllis.modernui.mc.text.TextRenderType;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.GuiTextRenderState;
+
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
@@ -177,32 +178,22 @@ public class MixinGuiTextRenderState {
                 backgroundColor, stripPoseTranslation);
     }
 
-    @Redirect(method = "ensurePrepared",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;prepareText" +
-                    "(Lnet/minecraft/util/FormattedCharSequence;FFIZI)Lnet/minecraft/client/gui/Font$PreparedText;"),
-            require = 0)
-    private Font.PreparedText onPrepareTextLegacy(Font font, FormattedCharSequence text,
-                                                  float x, float y, int color, boolean dropShadow,
-                                                  int backgroundColor) {
-        // 1.21.10 and older do not have the 'includeEmpty' parameter.
-        return onPrepareText(font, text, x, y, color, dropShadow, /*includeEmpty*/ false, backgroundColor);
-    }
 
-    @Redirect(method = "ensurePrepared",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/navigation/ScreenRectangle;" +
-                    "transformMaxBounds(Lorg/joml/Matrix3x2f;)Lnet/minecraft/client/gui/navigation/ScreenRectangle;"),
-            require = 0)
-    private ScreenRectangle onTransformMaxBounds(ScreenRectangle bounds, Matrix3x2f pose) {
-        Font.PreparedText preparedText = this.preparedText;
-        if (preparedText instanceof ModernPreparedText modernPreparedText &&
-                modernPreparedText.isStripPoseTranslation()) {
-            Matrix3x2f poseNoTranslation = new Matrix3x2f(pose);
-            poseNoTranslation.m20 = 0;
-            poseNoTranslation.m21 = 0;
-            return bounds.transformMaxBounds(poseNoTranslation);
-        }
-        return bounds.transformMaxBounds(pose);
-    }
+//    @Redirect(method = "ensurePrepared",
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/navigation/ScreenRectangle;" +
+//                    "transformMaxBounds(Lorg/joml/Matrix3x2f;)Lnet/minecraft/client/gui/navigation/ScreenRectangle;"),
+//            require = 0)
+//    private ScreenRectangle onTransformMaxBounds(ScreenRectangle bounds, Matrix3x2f pose) {
+//        Font.PreparedText preparedText = this.preparedText;
+//        if (preparedText instanceof ModernPreparedText modernPreparedText &&
+//                modernPreparedText.isStripPoseTranslation()) {
+//            Matrix3x2f poseNoTranslation = new Matrix3x2f(pose);
+//            poseNoTranslation.m20 = 0;
+//            poseNoTranslation.m21 = 0;
+//            return bounds.transformMaxBounds(poseNoTranslation);
+//        }
+//        return bounds.transformMaxBounds(pose);
+//    }
 
     @Redirect(method = "ensurePrepared",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/navigation/ScreenRectangle;" +

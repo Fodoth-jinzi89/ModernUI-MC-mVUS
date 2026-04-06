@@ -66,35 +66,37 @@ public abstract class MixinCommandSuggestions {
     public abstract void showSuggestions(boolean b);
 
     @Inject(method = "updateCommandInfo",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientSuggestionProvider;" +
-                    "getCustomTabSugggestions()Ljava/util/Collection;"),
+            at = @At("HEAD"),
             cancellable = true)
-    private void onUpdateCommandInfo(CallbackInfo ci) {
-        if (ModernUIClient.sEmojiShortcodes) {
-            String inputValue = input.getValue();
+    private void onUpdateCommandInfoEmoji(CallbackInfo ci) {
+        if (!ModernUIClient.sEmojiShortcodes) return;
 
-            if (!commandsOnly && !inputValue.startsWith("/")) {
-                String candidate = inputValue.substring(0, input.getCursorPosition());
-                int startPos = getLastWordIndex(candidate);
+        String command = this.input.getValue();
+        int cursorPos = this.input.getCursorPosition();
+        String partial = command.substring(0, cursorPos);
+        int lastWord = getLastWordIndex(partial);
 
-                if (candidate.startsWith(":", startPos) && candidate.length() - startPos >= 2) {
-                    Collection<String> suggestions = FontResourceManager.getInstance().getEmojiShortcodes(
-                            candidate.charAt(startPos + 1)
-                    );
-                    if (!suggestions.isEmpty()) {
-                        pendingSuggestions = SharedSuggestionProvider.suggest(suggestions,
-                                new SuggestionsBuilder(candidate, startPos));
-                        pendingSuggestions.thenRun(() -> {
-                            if (!pendingSuggestions.isDone()) {
-                                return;
-                            }
-                            if (minecraft.options.autoSuggestions().get()) {
-                                showSuggestions(false);
-                            }
-                        });
-                        ci.cancel();
+        // 仅在非命令文本中启用 emoji
+        boolean startsWithSlash = partial.startsWith("/");
+        boolean isCommand = this.commandsOnly || startsWithSlash;
+        if (!isCommand && partial.startsWith(":", lastWord) && partial.length() - lastWord >= 2) {
+            Collection<String> suggestions = FontResourceManager.getInstance()
+                    .getEmojiShortcodes(partial.charAt(lastWord + 1));
+
+            if (!suggestions.isEmpty()) {
+                this.pendingSuggestions = SharedSuggestionProvider.suggest(
+                        suggestions,
+                        new SuggestionsBuilder(partial, lastWord)
+                );
+
+                this.pendingSuggestions.thenRun(() -> {
+                    if (!this.pendingSuggestions.isDone()) return;
+                    if (this.minecraft.options.autoSuggestions().get()) {
+                        showSuggestions(false);
                     }
-                }
+                });
+
+                ci.cancel(); // 阻止原方法继续生成普通非命令建议
             }
         }
     }

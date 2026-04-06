@@ -19,25 +19,25 @@
 package icyllis.modernui.mc;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 
 import java.lang.reflect.Constructor;
 
 /**
- * Patch-level compatibility helpers for {@link GuiGraphics} constructors.
+ * Patch-level compatibility helpers for {@link GuiGraphicsExtractor} constructors.
  */
 public final class GuiGraphicsCompat {
 
-    private static final Constructor<GuiGraphics> CTOR_WITH_DIMS =
+    private static final Constructor<GuiGraphicsExtractor> CTOR_WITH_DIMS =
             resolveConstructor(Minecraft.class, GuiRenderState.class, int.class, int.class);
-    private static final Constructor<GuiGraphics> CTOR_NO_DIMS =
+    private static final Constructor<GuiGraphicsExtractor> CTOR_NO_DIMS =
             resolveConstructor(Minecraft.class, GuiRenderState.class);
 
     private GuiGraphicsCompat() {
     }
 
-    public static GuiGraphics create(Minecraft minecraft, GuiRenderState renderState, int guiWidth, int guiHeight) {
+    public static GuiGraphicsExtractor create(Minecraft minecraft, GuiRenderState renderState, int guiWidth, int guiHeight) {
         try {
             if (CTOR_WITH_DIMS != null) {
                 return CTOR_WITH_DIMS.newInstance(minecraft, renderState, guiWidth, guiHeight);
@@ -46,15 +46,15 @@ public final class GuiGraphicsCompat {
                 return CTOR_NO_DIMS.newInstance(minecraft, renderState);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to construct GuiGraphics", e);
+            throw new RuntimeException("Failed to construct GuiGraphicsExtractor", e);
         }
-        throw new IllegalStateException("No compatible GuiGraphics constructor found");
+        throw new IllegalStateException("No compatible GuiGraphicsExtractor constructor found");
     }
 
     @SuppressWarnings("unchecked")
-    private static Constructor<GuiGraphics> resolveConstructor(Class<?>... parameterTypes) {
+    private static Constructor<GuiGraphicsExtractor> resolveConstructor(Class<?>... parameterTypes) {
         try {
-            return (Constructor<GuiGraphics>) GuiGraphics.class.getConstructor(parameterTypes);
+            return (Constructor<GuiGraphicsExtractor>) GuiGraphicsExtractor.class.getConstructor(parameterTypes);
         } catch (Exception ignored) {
             return null;
         }

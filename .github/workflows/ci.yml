@@ -17,9 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: "Java 25 • 26.1-snapshot-1 • Fabric"
+          - name: "Java 25 • 26.1 • Fabric"
             java: "25"
-            minecraft_version: "26.1-snapshot-1"
+            minecraft_version: "26.1"
             gradle_tasks: ":ModernUI-Fabric:build -x test"
           - name: "Java 21 • 1.21.11 • Fabric/Forge/NeoForge"
             java: "21"

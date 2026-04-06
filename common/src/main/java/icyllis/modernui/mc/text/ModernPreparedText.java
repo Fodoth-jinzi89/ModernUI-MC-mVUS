@@ -27,8 +27,9 @@ import icyllis.modernui.mc.TextureSetupCompat;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiRenderState;
+
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
@@ -330,7 +331,7 @@ public class ModernPreparedText implements Font.PreparedText {
         }
         if ((bgColor & 0xFF000000) != 0) {
             // this is only used by CartographyTableScreen, emit as normal fills
-            renderState.submitGlyphToCurrentLayer(
+            renderState.addGlyphToCurrentLayer(
                     new GradientRectangleRenderState(
                             RenderPipelines.GUI,
                             TextureSetup.noTexture(),
@@ -345,7 +346,7 @@ public class ModernPreparedText implements Font.PreparedText {
         // For-index is 2x faster than enhanced-for
         for (int i = 0; i < runs.size(); i++) {
             var run = runs.get(i);
-            renderState.submitGlyphToCurrentLayer(
+            renderState.addGlyphToCurrentLayer(
                     new TextRunRenderState(pose2d, run.pipeline,
                             TextureSetupCompat.singleTextureWithLightmap(run.textureView, run.sampler),
                             scissor,
@@ -357,7 +358,7 @@ public class ModernPreparedText implements Font.PreparedText {
             );
         }
         if (hasEffect) {
-            renderState.submitGlyphToCurrentLayer(
+            renderState.addGlyphToCurrentLayer(
                     new TextEffectRenderState(pose2d,
                             scissor,
                             x, top, color, dropShadow,

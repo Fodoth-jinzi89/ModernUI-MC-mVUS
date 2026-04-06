@@ -21,7 +21,7 @@ package icyllis.modernui.mc;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import icyllis.modernui.animation.ColorEvaluator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.screens.Screen;
@@ -220,7 +220,7 @@ public enum BlurHandler {
     }
 
     // INTERNAL HOOK
-    public void drawScreenBackground(@Nonnull GuiGraphics gr, int x1, int y1, int x2, int y2) {
+    public void drawScreenBackground(@Nonnull GuiGraphicsExtractor gr, int x1, int y1, int x2, int y2) {
         if (minecraft.level == null) {
             gr.fill(x1, y1, x2, y2, 0xFF191919);
         } else {

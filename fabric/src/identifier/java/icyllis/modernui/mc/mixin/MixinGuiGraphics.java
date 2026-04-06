@@ -23,7 +23,7 @@ import icyllis.modernui.mc.ModernUIMod;
 import icyllis.modernui.mc.TooltipRenderer;
 import icyllis.modernui.mc.UIManager;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(GuiGraphics.class)
+@Mixin(GuiGraphicsExtractor.class)
 public abstract class MixinGuiGraphics implements IModernGuiGraphics {
 
     // equivalent to Forge
@@ -81,9 +81,7 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
     }
 
     @Unique
-    private boolean modernUI_MC$invokeSetTooltipForNextFrameInternal(Font font, List<ClientTooltipComponent> components,
-                                                                     int x, int y, ClientTooltipPositioner positioner,
-                                                                     @Nullable Object tooltipStyle, boolean deferred) {
+    private boolean modernUI_MC$invokeSetTooltipForNextFrameInternal(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable Object tooltipStyle, boolean deferred) {
         Method method = modernUI_MC$getSetTooltipForNextFrameInternal();
         if (method == null) {
             return false;
@@ -94,9 +92,7 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
         } catch (Throwable t) {
             if (!modernUI_MC$loggedSetTooltipForNextFrameInternalFailure) {
                 modernUI_MC$loggedSetTooltipForNextFrameInternalFailure = true;
-                ModernUIMod.LOGGER.warn(ModernUIMod.MARKER,
-                        "Failed to invoke GuiGraphics#setTooltipForNextFrameInternal; falling back to vanilla tooltip rendering.",
-                        t);
+                ModernUIMod.LOGGER.warn(ModernUIMod.MARKER, "Failed to invoke GuiGraphics#setTooltipForNextFrameInternal; falling back to vanilla tooltip rendering.", t);
             }
             return false;
         }
@@ -104,7 +100,7 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
 
     @Unique
     private static @Nullable Method modernUI_MC$resolveSetTooltipForNextFrameInternal() {
-        for (Method method : GuiGraphics.class.getDeclaredMethods()) {
+        for (Method method : GuiGraphicsExtractor.class.getDeclaredMethods()) {
             if (method.getReturnType() != void.class) {
                 continue;
             }
@@ -147,32 +143,22 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
         return null;
     }
 
-    @Inject(method = "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V",
-            at = @At("HEAD"))
+    @Inject(method = "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", at = @At("HEAD"))
     private void preRenderTooltip(Font font, ItemStack stack, int x, int y, CallbackInfo ci) {
         modernUI_MC$tooltipStack = stack;
     }
 
-    @Inject(method = "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V",
-            at = @At("TAIL"))
+    @Inject(method = "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V", at = @At("TAIL"))
     private void postRenderTooltip(Font font, ItemStack stack, int x, int y, CallbackInfo ci) {
         modernUI_MC$tooltipStack = ItemStack.EMPTY;
     }
 
-    @Inject(method = {
-            "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;" +
-                    "IILnet/minecraft/resources/Identifier;)V",
-    },
-            at = @At("HEAD"), cancellable = true)
-    private void onRenderTooltip(Font font, List<Component> components, Optional<TooltipComponent> tooltipComponent,
-                                 int x, int y, @Nullable @Coerce Object tooltipStyle, CallbackInfo ci) {
+    @Inject(method = {"setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;" + "IILnet/minecraft/resources/Identifier;)V",}, at = @At("HEAD"), cancellable = true)
+    private void onRenderTooltip(Font font, List<Component> texts, Optional<TooltipComponent> optionalImage, int xo, int yo, @Nullable @Coerce Object style, CallbackInfo ci) {
         if (TooltipRenderer.sTooltip && TooltipRenderer.sLineWrapping_FabricOnly) {
-            if (!components.isEmpty()) {
-                var transformedComponents = modernUI_MC$transformComponents(
-                        font, components, tooltipComponent, x
-                );
-                if (modernUI_MC$invokeSetTooltipForNextFrameInternal(font, transformedComponents,
-                        x, y, DefaultTooltipPositioner.INSTANCE, tooltipStyle, false)) {
+            if (!texts.isEmpty()) {
+                var transformedComponents = modernUI_MC$transformComponents(font, texts, optionalImage, xo);
+                if (modernUI_MC$invokeSetTooltipForNextFrameInternal(font, transformedComponents, xo, yo, DefaultTooltipPositioner.INSTANCE, style, false)) {
                     ci.cancel();
                 }
             }
@@ -181,9 +167,7 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
 
     // equivalent to Forge
     @Unique
-    private List<ClientTooltipComponent> modernUI_MC$transformComponents(
-            Font font, List<Component> components, Optional<TooltipComponent> tooltipComponent,
-            int x) {
+    private List<ClientTooltipComponent> modernUI_MC$transformComponents(Font font, List<Component> components, Optional<TooltipComponent> tooltipComponent, int x) {
         List<ClientTooltipComponent> result = new ArrayList<>(components.size() + 1);
 
         int screenWidth = guiWidth();
@@ -200,8 +184,7 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
             if (tooltipX < TooltipRenderer.H_BORDER) {
                 if (x > screenWidth / 2)
                     tooltipWidth = x - TooltipRenderer.TOOLTIP_SPACE - TooltipRenderer.H_BORDER * 2;
-                else
-                    tooltipWidth = screenWidth - TooltipRenderer.TOOLTIP_SPACE - TooltipRenderer.H_BORDER - x;
+                else tooltipWidth = screenWidth - TooltipRenderer.TOOLTIP_SPACE - TooltipRenderer.H_BORDER - x;
             }
         }
 
@@ -222,32 +205,18 @@ public abstract class MixinGuiGraphics implements IModernGuiGraphics {
         return result;
     }
 
-    @Inject(method = "setTooltipForNextFrameInternal",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/GuiGraphics;" +
-                    "deferredTooltip:Ljava/lang/Runnable;",
-                    opcode = Opcodes.PUTFIELD))
-    private void onRenderTooltipInternal(Font arg, List<ClientTooltipComponent> list, int m, int n,
-                                         ClientTooltipPositioner arg2,
-                                         @Nullable @Coerce Object arg3, boolean bl, CallbackInfo ci) {
+    @Inject(method = "setTooltipForNextFrameInternal", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;" + "deferredTooltip:Ljava/lang/Runnable;", opcode = Opcodes.PUTFIELD))
+    private void onRenderTooltipInternal(Font arg, List<ClientTooltipComponent> list, int m, int n, ClientTooltipPositioner arg2, @Nullable @Coerce Object arg3, boolean bl, CallbackInfo ci) {
         modernUI_MC$deferredTooltipStack = modernUI_MC$tooltipStack;
     }
 
-    @Inject(method = {
-            "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;" +
-                    "Lnet/minecraft/resources/Identifier;)V",
-    }, at = @At("HEAD"), cancellable = true)
-    private void onRenderTooltip(Font font, List<ClientTooltipComponent> components,
-                                 int x, int y, ClientTooltipPositioner positioner,
-                                 @Nullable @Coerce Object tooltipStyle,
-                                 CallbackInfo ci) {
+    @Inject(method = {"tooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;" + "Lnet/minecraft/resources/Identifier;)V",}, at = @At("HEAD"), cancellable = true)
+    private void onRenderTooltip(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, @Nullable @Coerce Object tooltipStyle, CallbackInfo ci) {
         ItemStack capturedTooltipStack = modernUI_MC$deferredTooltipStack;
         modernUI_MC$deferredTooltipStack = ItemStack.EMPTY;
         if (TooltipRenderer.sTooltip) {
             if (!components.isEmpty()) {
-                UIManager.getInstance().drawExtTooltip(capturedTooltipStack,
-                        (GuiGraphics) (Object) this,
-                        components, x, y, font,
-                        guiWidth(), guiHeight(), positioner, tooltipStyle);
+                UIManager.getInstance().drawExtTooltip(capturedTooltipStack, (GuiGraphicsExtractor) (Object) this, components, x, y, font, guiWidth(), guiHeight(), positioner, tooltipStyle);
                 ci.cancel();
             }
         }

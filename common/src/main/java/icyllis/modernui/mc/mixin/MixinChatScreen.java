@@ -41,7 +41,7 @@ public class MixinChatScreen {
     private boolean modernUI_MC$broadcasting;
 
     @Inject(method = "onEdited", at = @At("HEAD"))
-    private void _onEdited(String s, CallbackInfo ci) {
+    private void _onEdited(String value, CallbackInfo ci) {
         if (!modernUI_MC$broadcasting &&
                 ModernUIClient.sEmojiShortcodes &&
                 !input.getValue().startsWith("/") &&

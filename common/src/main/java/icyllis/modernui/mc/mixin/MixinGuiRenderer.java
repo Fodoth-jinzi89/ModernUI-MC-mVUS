@@ -41,8 +41,8 @@ public class MixinGuiRenderer {
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;bindDefaultUniforms" +
                     "(Lcom/mojang/blaze3d/systems/RenderPass;)V", shift = At.Shift.AFTER, remap = false),
             locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onExecuteDrawRange(Supplier<String> $$0, RenderTarget $$1, GpuBufferSlice $$2, GpuBufferSlice $$3,
-                                    GpuBuffer $$4, VertexFormat.IndexType $$5, int $$6, int $$7, CallbackInfo ci,
+    private void onExecuteDrawRange(Supplier<String> label, RenderTarget mainRenderTarget, GpuBufferSlice fogBuffer, GpuBufferSlice dynamicTransforms,
+                                    GpuBuffer indexBuffer, VertexFormat.IndexType indexType, int startIndex, int endIndex, CallbackInfo ci,
                                     RenderPass renderPass) {
         if (TooltipRenderer.sTooltip) {
             GpuBufferSlice tooltipUniforms = UIManager.getInstance().mTooltipRenderer.mUniforms;

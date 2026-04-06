@@ -18,11 +18,11 @@
 
 package icyllis.modernui.mc.text.mixin;
 
-import net.minecraft.client.renderer.blockentity.SignRenderer;
+import net.minecraft.client.renderer.blockentity.StandingSignRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Deprecated
-@Mixin(SignRenderer.class)
+@Mixin(StandingSignRenderer.class)
 public class MixinSignRenderer {
 
     /*@Shadow

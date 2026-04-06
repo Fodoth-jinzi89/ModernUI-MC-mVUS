@@ -1,6 +1,6 @@
 package icyllis.modernui.mc;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 
 import java.lang.reflect.Method;
@@ -16,7 +16,7 @@ public final class TooltipRenderUtilCompat {
     private TooltipRenderUtilCompat() {
     }
 
-    public static void renderTooltipBackground(GuiGraphics graphics,
+    public static void renderTooltipBackground(GuiGraphicsExtractor graphics,
                                                int x,
                                                int y,
                                                int width,
@@ -38,7 +38,7 @@ public final class TooltipRenderUtilCompat {
                 continue;
             }
             Class<?>[] params = method.getParameterTypes();
-            if (params[0] != GuiGraphics.class ||
+            if (params[0] != GuiGraphicsExtractor.class ||
                     params[1] != int.class ||
                     params[2] != int.class ||
                     params[3] != int.class ||

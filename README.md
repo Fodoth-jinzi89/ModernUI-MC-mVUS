@@ -200,7 +200,7 @@ dependencies {
     - 快照（JDK 25）：`JAVA_HOME=$(/usr/libexec/java_home -v 25) ./gradlew buildReleaseJars`
     - 旧版本（JDK 21）：`JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew buildReleaseJars -Pminecraft_version=1.21.11`
 - 一条命令构建可分发 jar：
-  - Fabric：`./gradlew buildReleaseJars -Pminecraft_version=<mc_version>`（默认：`26.1-snapshot-1`）
+  - Fabric：`./gradlew buildReleaseJars -Pminecraft_version=26.1`（默认：`26.1-snapshot-1`）
   - Forge / NeoForge：使用 `-Pminecraft_version=1.21.11`（26.1 快照目前仅提供 Fabric 配置）
 - 输出位置（可直接用于发布）：`build/release/ModernUI-MC-<mod_version>-{fabric,forge,neoforge}.jar`
 - 运行开发客户端：
@@ -263,3 +263,21 @@ Markdown
 ![控件（b）](https://i.loli.net/2020/04/10/LDBFc1qo5wtnS8u.png)
 
 </details>
+
+## 关于 26.1 尝鲜版
+
+适用于 **Minecraft 26.1-26.1.1 正式版**，依赖如下模组：
+
+- **Fabric Loader**: `>=0.18.6`
+- **Fabric API**: `>=0.145.1+26.1`
+- **Mod Menu**: `>=18.0.0-alpha.8`
+- **Forge Config API Port**: `>=26.1.0.2`
+
+> ⚠️ 本版本由 [@Fodoth_jinzi89](https://github.com/Fodoth-jinzi89) 个人更新，仅达到基本可用水平，不保证完全稳定。
+
+### 已知问题
+
+1. **告示牌文字无法渲染**
+  - 包括悬挂告示牌。
+2. **工具物品提示框的圆角模式无法正确渲染背景**
+  - 请手动关闭 `Esc-模组-Modern UI-配置-扩展-边框样式-圆角化` ，使用方形模式。

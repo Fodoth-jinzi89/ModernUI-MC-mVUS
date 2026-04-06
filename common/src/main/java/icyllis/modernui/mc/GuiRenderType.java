@@ -19,11 +19,16 @@
 package icyllis.modernui.mc;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.Optional;
 
 /**
  * Modern GUI.
@@ -41,7 +46,10 @@ public abstract class GuiRenderType {
             .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
             .withUniform("Projection", UniformType.UNIFORM_BUFFER)
             .withUniform("ModernTooltip", UniformType.UNIFORM_BUFFER)
-            .withBlend(BlendFunction.TRANSLUCENT)
+            .withColorTargetState(
+                    new ColorTargetState(Optional.of(BlendFunction.TRANSLUCENT), ColorTargetState.WRITE_ALL)
+            )
+            .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)) // 深度测试始终通过，避免被覆盖
             .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
             .build();
 

@@ -58,7 +58,7 @@ public class ScrollController {
             float p = Math.min((float) (time - startTime) / duration, 1);
             p = TimeInterpolator.DECELERATE.getInterpolation(p);
             currValue = Mth.lerp(p, startValue, targetValue);
-            listener.onScrollAmountUpdated(this, currValue);
+            listener.modernUI_MC$onScrollAmountUpdated(this, currValue);
             //UIManager.getInstance().repostCursorEvent();
         }
     }
@@ -166,7 +166,7 @@ public class ScrollController {
      */
     public void abortAnimation() {
         currValue = targetValue;
-        listener.onScrollAmountUpdated(this, currValue);
+        listener.modernUI_MC$onScrollAmountUpdated(this, currValue);
         //UIManager.getInstance().repostCursorEvent();
     }
 
@@ -183,6 +183,6 @@ public class ScrollController {
          * @param controller scroller to call the method
          * @param amount     current scroll amount
          */
-        void onScrollAmountUpdated(ScrollController controller, float amount);
+        void modernUI_MC$onScrollAmountUpdated(ScrollController controller, float amount);
     }
 }

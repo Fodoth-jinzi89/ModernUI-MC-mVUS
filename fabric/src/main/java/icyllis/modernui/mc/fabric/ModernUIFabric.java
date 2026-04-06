@@ -42,6 +42,7 @@ public class ModernUIFabric extends ModernUIMod implements ModInitializer {
         sUntranslatedItemsLoaded = FabricLoader.getInstance().isModLoaded("untranslateditems");
 
         ModConfigEvents.loading(ModernUI.ID).register(ConfigImpl::reloadCommon);
+        ModConfigEvents.loading(ModernUI.ID).register(ConfigImpl::reloadCommon);
         ModConfigEvents.reloading(ModernUI.ID).register(ConfigImpl::reloadCommon);
         ConfigRegistry.INSTANCE.register(ModernUI.ID, ModConfig.Type.COMMON, ConfigImpl.COMMON_SPEC,
                 ModernUI.NAME_CPT + "/common.toml");

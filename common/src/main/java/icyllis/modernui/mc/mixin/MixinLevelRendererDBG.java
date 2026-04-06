@@ -41,7 +41,7 @@ import static icyllis.modernui.mc.ModernUIMod.LOGGER;
 @Mixin(LevelRenderer.class)
 public class MixinLevelRendererDBG {
 
-    @Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=blockentities", ordinal = 0))
+    @Inject(method = "extractLevel", at = @At(value = "CONSTANT", args = "stringValue=blockEntities", ordinal = 0))
     private void afterEntities(CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         if (KeyCompat.isAltDown(minecraft.getWindow()) &&

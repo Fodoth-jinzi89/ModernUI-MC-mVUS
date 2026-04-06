@@ -80,7 +80,7 @@ public abstract class MixinEditBox implements IModernEditBox {
     }
 
     @Inject(method = "getWordPosition(IIZ)I", at = @At("HEAD"), cancellable = true)
-    public void onGetWordPosition(int dir, int cursor, boolean withEndSpace,
+    public void onGetWordPosition(int dir, int from, boolean stripSpaces,
                                   CallbackInfoReturnable<Integer> cir) {
         // assume command starts with slash
         if ((dir == -1 || dir == 1) && !value.startsWith("/")) {
@@ -88,17 +88,17 @@ public abstract class MixinEditBox implements IModernEditBox {
             if (wordIterator == null) {
                 modernUI_MC$wordIterator = wordIterator = new WordIterator();
             }
-            wordIterator.setCharSequence(value, cursor, cursor);
+            wordIterator.setCharSequence(value, from, from);
             int offset;
             if (dir == -1) {
-                offset = wordIterator.preceding(cursor);
+                offset = wordIterator.preceding(from);
             } else {
-                offset = wordIterator.following(cursor);
+                offset = wordIterator.following(from);
             }
             if (offset != BreakIterator.DONE) {
                 cir.setReturnValue(offset);
             } else {
-                cir.setReturnValue(cursor);
+                cir.setReturnValue(from);
             }
         }
     }
@@ -107,31 +107,32 @@ public abstract class MixinEditBox implements IModernEditBox {
             method = "setValue",
             at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;value:Ljava/lang/String;",
                     opcode = Opcodes.PUTFIELD))
-    public void onSetValue(String string, CallbackInfo ci) {
+    public void onSetValue(String value, CallbackInfo ci) {
         if (modernUI_MC$undoManager.isInUndo()) {
             return;
         }
-        if (value.isEmpty() && string.isEmpty()) {
+        if (this.value.isEmpty() && value.isEmpty()) {
             return;
         }
         // we see this operation as Replace
         EditBoxEditAction edit = new EditBoxEditAction(
                 modernUI_MC$undoOwner(),
                 cursorPos,
-                /*oldText*/ value,
+                /*oldText*/ this.value,
                 0,
-                /*newText*/ string
+                /*newText*/ value
         );
         modernUI_MC$addEdit(edit, false);
     }
+
 
     @Inject(
             method = "insertText",
             at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;value:Ljava/lang/String;",
                     opcode = Opcodes.PUTFIELD),
             locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void onInsertText(String string, CallbackInfo ci,
-                             int i, int j, int k, String string2, int l, String string3) {
+    public void onInsertText(String input, CallbackInfo ci,
+                             int i, int j, int k, String string2, int l) {
         if (modernUI_MC$undoManager.isInUndo()) {
             return;
         }
@@ -164,8 +165,8 @@ public abstract class MixinEditBox implements IModernEditBox {
             at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/components/EditBox;value:Ljava/lang/String;",
                     opcode = Opcodes.PUTFIELD),
             locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void onDeleteChars(int i, CallbackInfo ci,
-                              int j, int k, String string) {
+    public void onDeleteChars(int pos, CallbackInfo ci,
+                              int j, int k) {
         if (modernUI_MC$undoManager.isInUndo()) {
             return;
         }

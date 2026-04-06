@@ -57,15 +57,14 @@ public abstract class MixinWindow {
      * @reason Make GUI scale more suitable, and not limited to even numbers when forceUnicode = true
      */
     @Inject(method = "calculateScale", at = @At("HEAD"), cancellable = true)
-    public void onCalculateScale(int guiScaleIn, boolean forceUnicode, CallbackInfoReturnable<Integer> ci) {
+    public void onCalculateScale(int maxScale, boolean enforceUnicode, CallbackInfoReturnable<Integer> ci) {
         int r = MuiModApi.calcGuiScales((Window) (Object) this);
-        ci.setReturnValue(guiScaleIn > 0 ? MathUtil.clamp(guiScaleIn, r >> 8 & 0xf, r & 0xf) : r >> 4 & 0xf);
+        ci.setReturnValue(maxScale > 0 ? MathUtil.clamp(maxScale, r >> 8 & 0xf, r & 0xf) : r >> 4 & 0xf);
     }
 
     @Inject(method = "setGuiScale", at = @At("HEAD"))
-    private void onSetGuiScale(int scaleFactor, CallbackInfo ci) {
-        int oldScale = (int) guiScale;
-        int newScale = (int) scaleFactor;
+    private void onSetGuiScale(int guiScale, CallbackInfo ci) {
+        int oldScale = (int) this.guiScale;
 
         DisplayMetrics metrics = new DisplayMetrics();
         metrics.setToDefaults();
@@ -74,7 +73,7 @@ public abstract class MixinWindow {
         metrics.heightPixels = getHeight();
 
         // the base scale is 2x, so divide by 2
-        metrics.density = newScale * 0.5f;
+        metrics.density = (int) guiScale * 0.5f;
         metrics.densityDpi = (int) (metrics.density * DisplayMetrics.DENSITY_DEFAULT);
         metrics.scaledDensity = ModernUIClient.sFontScale * metrics.density;
 
@@ -96,62 +95,8 @@ public abstract class MixinWindow {
             ctx.getResources().updateMetrics(metrics);
         }
 
-        MuiModApi.dispatchOnWindowResize(getWidth(), getHeight(), newScale, oldScale);
+        MuiModApi.dispatchOnWindowResize(getWidth(), getHeight(), (int) guiScale, oldScale);
     }
 
-    @Redirect(method = "<init>",
-            at = @At(value = "INVOKE",
-                    target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V",
-                    ordinal = 5),
-            remap = false
-    )
-    private void onInit(int x, int y) {
-        if (MuiModApi.get().isGLVersionPromoted()) {
-            return;
-        }
-        if (Platform.get() == Platform.MACOSX ||
-                Boolean.parseBoolean(ModernUIClient.getBootstrapProperty(
-                        ModernUIClient.BOOTSTRAP_SKIP_GL_VERSION_PROMOTION))) {
-            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
-            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
-            if (Platform.get() == Platform.MACOSX) {
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 1);
-            } else {
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
-            }
-        } else {
-            GLFWErrorCallback callback = GLFW.glfwSetErrorCallback(null);
-            GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
-            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
-            long window = 0;
-            try {
-                for (int minor = 6; minor >= 0; minor--) {
-                    GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
-                    GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, minor);
-                    ModernUIMod.LOGGER.debug(ModernUIMod.MARKER, "Trying OpenGL 4.{}", minor);
-                    window = GLFW.glfwCreateWindow(640, 480, "System Testing", 0, 0);
-                    if (window != 0) {
-                        ModernUIMod.LOGGER.info(ModernUIMod.MARKER, "Promoted to OpenGL 4.{} Core Profile",
-                                minor);
-                        return;
-                    }
-                }
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
-            } catch (Throwable e) {
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
-                GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
-                ModernUIMod.LOGGER.warn(ModernUIMod.MARKER, "Fallback to OpenGL 3.2 Core Profile", e);
-            } finally {
-                if (window != 0) {
-                    GLFW.glfwDestroyWindow(window);
-                }
-                GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_TRUE);
-                GLFW.glfwSetErrorCallback(callback);
-            }
-        }
-    }
+
 }

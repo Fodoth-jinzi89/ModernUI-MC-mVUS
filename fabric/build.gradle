@@ -29,29 +29,44 @@ abstract class FixAccessWidenerNamespaceTransform implements TransformAction<Tra
 
         boolean needsRewrite = false
         ZipFile zipFile = new ZipFile(inputFile)
+
         try {
             zipFile.entries().each { ZipEntry entry ->
                 if (needsRewrite) {
                     return
                 }
-                if (!entry.name.endsWith(".accesswidener")) {
+
+                boolean isAW = entry.name.endsWith(".accesswidener")
+                boolean isCT = entry.name.endsWith(".classtweaker")
+
+                if (!isAW && !isCT) {
                     return
                 }
+
                 String firstLine = zipFile.getInputStream(entry).withCloseable { inputStream ->
                     byte[] bytes = inputStream.readNBytes(256)
                     int newLineIndex = -1
+
                     for (int i = 0; i < bytes.length; i++) {
                         if (bytes[i] == (byte) '\n') {
                             newLineIndex = i
                             break
                         }
                     }
+
                     if (newLineIndex < 0) {
                         return null
                     }
+
                     return new String(bytes, 0, newLineIndex, StandardCharsets.UTF_8).trim()
                 }
-                if (firstLine != null && firstLine ==~ /^accessWidener\s+v\d+\s+official\s*$/) {
+
+                if (firstLine == null) {
+                    return
+                }
+
+                if (firstLine ==~ /^accessWidener\s+v\d+\s+intermediary\s*$/ ||
+                        firstLine ==~ /^classTweaker\s+v\d+\s+intermediary\s*$/) {
                     needsRewrite = true
                 }
             }
@@ -66,21 +81,31 @@ abstract class FixAccessWidenerNamespaceTransform implements TransformAction<Tra
 
         ZipInputStream zipInputStream = new ZipInputStream(inputFile.newInputStream())
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputFile.newOutputStream())
+
         try {
             ZipEntry entry
             while ((entry = zipInputStream.nextEntry) != null) {
+
                 // Avoid invalid signatures if we modify jar contents.
                 if (entry.name.startsWith("META-INF/")) {
                     String upperName = entry.name.toUpperCase(Locale.ROOT)
-                    if (upperName.endsWith(".SF") || upperName.endsWith(".RSA") || upperName.endsWith(".DSA") || upperName.endsWith(".EC")) {
+                    if (upperName.endsWith(".SF") ||
+                            upperName.endsWith(".RSA") ||
+                            upperName.endsWith(".DSA") ||
+                            upperName.endsWith(".EC")) {
                         continue
                     }
                 }
 
                 byte[] contents = zipInputStream.readAllBytes()
-                if (entry.name.endsWith(".accesswidener")) {
+
+                if (entry.name.endsWith(".accesswidener") || entry.name.endsWith(".classtweaker")) {
                     String text = new String(contents, StandardCharsets.UTF_8)
-                    String normalized = text.replaceFirst(/(?m)^accessWidener\s+v(\d+)\s+official\s*$/, 'accessWidener v$1 intermediary')
+
+                    String normalized = text
+                            .replaceFirst(/(?m)^accessWidener\s+v(\d+)\s+intermediary\s*$/, 'accessWidener v$1 official')
+                            .replaceFirst(/(?m)^classTweaker\s+v(\d+)\s+intermediary\s*$/, 'classTweaker v$1 official')
+
                     if (normalized != text) {
                         contents = normalized.getBytes(StandardCharsets.UTF_8)
                     }
@@ -88,10 +113,12 @@ abstract class FixAccessWidenerNamespaceTransform implements TransformAction<Tra
 
                 ZipEntry outEntry = new ZipEntry(entry.name)
                 outEntry.time = entry.time
+
                 zipOutputStream.putNextEntry(outEntry)
                 zipOutputStream.write(contents)
                 zipOutputStream.closeEntry()
             }
+
         } finally {
             zipOutputStream.close()
             zipInputStream.close()
@@ -100,10 +127,13 @@ abstract class FixAccessWidenerNamespaceTransform implements TransformAction<Tra
 }
 
 plugins {
-    id 'dev.architectury.loom' version '1.13-SNAPSHOT'
+    id 'dev.architectury.loom' version '1.14-SNAPSHOT'
     //id 'com.matthewprenger.cursegradle' version '1.4.0'
-    id 'com.gradleup.shadow' version '9.3.1'
+    id 'com.gradleup.shadow' version '9.4.1'
+    id 'idea'
+
 }
+
 
 version = mod_version as String
 
@@ -113,23 +143,35 @@ def mcPatch = (rootProject.modernUiMcTargetInfo.scheme == 'legacy'
 def useIdentifierResourceId = rootProject.modernUiMcTargetInfo.scheme != 'legacy' || mcPatch >= 11
 def identityMappingsFile = new File(rootProject.buildDir, "loom/identity-${minecraft_version}.tiny")
 if (rootProject.modernUiMcTargetInfo.scheme != 'legacy') {
+
+    println "[ModernUI] Non-legacy scheme detected: ${rootProject.modernUiMcTargetInfo.scheme}"
+
     identityMappingsFile.parentFile.mkdirs()
     identityMappingsFile.text = "tiny\t2\t0\tofficial\tnamed\n"
 
+    println "[ModernUI] Wrote identity mappings file: ${identityMappingsFile}"
+
     def artifactType = Attribute.of("artifactType", String)
     def awFixedJarType = "modernui-awfixed-jar"
+
+    println "[ModernUI] Registering AW namespace fix transform"
+    println "[ModernUI] artifactType: jar -> ${awFixedJarType}"
+
     dependencies {
         registerTransform(FixAccessWidenerNamespaceTransform) {
             from.attribute(artifactType, "jar")
             to.attribute(artifactType, awFixedJarType)
         }
     }
+
+
     configurations.configureEach { config ->
         if (config.name.startsWith("mod")) {
             config.attributes.attribute(artifactType, awFixedJarType)
         }
     }
 }
+
 
 sourceSets {
     main {
@@ -190,17 +232,23 @@ repositories {
     }
 }
 
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     if (rootProject.modernUiMcTargetInfo.scheme == 'legacy') {
         mappings loom.officialMojangMappings()
-    } else {
+    }
+    else {
+
         mappings loom.layered {
             mappings(identityMappingsFile) {
                 mergeNamespace('official')
             }
         }
     }
+
+    implementation "org.spongepowered:mixin:0.8.7"
+    //annotationProcessor "org.spongepowered:mixin:0.8.7:processor"
 
     modImplementation "net.fabricmc:fabric-loader:${rootProject.modernUiMcProfile.fabricLoader}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.modernUiMcProfile.fabricApi}"
@@ -325,7 +373,7 @@ if (project.hasProperty("keystore")) {
 
 processResources {
     def fabricLoaderRange = ">=${rootProject.modernUiMcProfile.fabricLoader}"
-    def minecraftRange = rootProject.modernUiMcVersionRangeFabric as String
+    def minecraftRange = ">=26.1"
     def fabricApiRange = ">=${rootProject.modernUiFabricApiMin}"
     def forgeConfigApiPortRange = ">=${rootProject.modernUiMcProfile.forgeConfigApiPortFabric}"
 
@@ -408,3 +456,4 @@ publishing {
         }
     }
 }
+

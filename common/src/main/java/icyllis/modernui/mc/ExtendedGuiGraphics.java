@@ -18,7 +18,7 @@
 
 package icyllis.modernui.mc;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -28,10 +28,10 @@ import org.joml.Matrix3x2fStack;
 import javax.annotation.Nonnull;
 
 /**
- * Extension of {@link GuiGraphics}.
+ * Extension of {@link GuiGraphicsExtractor}.
  * <p>
- * Each time you want to use this class, you create a new ExtendedGuiGraphics
- * using an existing GuiGraphics instance. There is no difference in operating
+ * Each time you want to use this class, you create a new ExtendedGuiGraphicsExtractor
+ * using an existing GuiGraphicsExtractor instance. There is no difference in operating
  * on this instance and the original instance.
  * <p>
  * Deprecation note: Due to GUI changes in Minecraft 1.21.6, methods that draw
@@ -42,7 +42,7 @@ import javax.annotation.Nonnull;
  */
 public class ExtendedGuiGraphics {
 
-    private final GuiGraphics guiGraphics;
+    private final GuiGraphicsExtractor GuiGraphicsExtractor;
 
     private int mColorTL = ~0;
     private int mColorTR = ~0;
@@ -52,15 +52,15 @@ public class ExtendedGuiGraphics {
     private float mDepth = 0;
     private float mWidth = 1;
 
-    public ExtendedGuiGraphics(@Nonnull GuiGraphics guiGraphics) {
-        this.guiGraphics = guiGraphics;
+    public ExtendedGuiGraphics(@Nonnull GuiGraphicsExtractor GuiGraphicsExtractor) {
+        this.GuiGraphicsExtractor = GuiGraphicsExtractor;
     }
 
     /**
      * Reference to pose stack to transform geometries' local coordinates.
      */
     public Matrix3x2fStack pose() {
-        return guiGraphics.pose();
+        return GuiGraphicsExtractor.pose();
     }
 
     /**
@@ -184,8 +184,8 @@ public class ExtendedGuiGraphics {
         if (!(left < right && top < bottom)) { // also capture NaN
             return;
         }
-        ScreenRectangle scissorArea = MuiModApi.get().peekScissorStack(guiGraphics);
-        MuiModApi.get().submitGuiElementRenderState(guiGraphics,
+        ScreenRectangle scissorArea = MuiModApi.get().peekScissorStack(GuiGraphicsExtractor);
+        MuiModApi.get().submitGuiElementRenderState(GuiGraphicsExtractor,
                 new GradientRectangleRenderState(
                         RenderPipelines.GUI,
                         TextureSetup.noTexture(),

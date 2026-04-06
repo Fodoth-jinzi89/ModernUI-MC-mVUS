@@ -176,7 +176,7 @@ public class ModernUIFabricClient extends ModernUIClient implements ClientModIni
                         Minecraft minecraft = Minecraft.getInstance();
                         if ((int) minecraft.getWindow().getGuiScale() !=
                                 minecraft.getWindow().calculateScale(value, false)) {
-                            minecraft.resizeDisplay();
+                            minecraft.resizeGui();
                         }
                     });
                 });

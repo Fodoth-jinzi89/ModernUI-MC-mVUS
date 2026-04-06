@@ -22,6 +22,7 @@ import icyllis.modernui.mc.LightCompat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import javax.annotation.Nonnull;
 
@@ -100,7 +101,7 @@ public class TextRenderEffect {
                 .setLight(LightCompat.FULL_BRIGHT);
     }
 
-    public static void drawUnderline(@Nonnull Matrix4f matrix, @Nonnull VertexConsumer builder,
+    public static void drawUnderline(@Nonnull Matrix4fc matrix, @Nonnull VertexConsumer builder,
                                      float start, float end, float baseline,
                                      int r, int g, int b, int a, int light) {
         baseline += UNDERLINE_OFFSET;
@@ -144,7 +145,7 @@ public class TextRenderEffect {
                 .setLight(LightCompat.FULL_BRIGHT);
     }
 
-    public static void drawStrikethrough(@Nonnull Matrix4f matrix, @Nonnull VertexConsumer builder,
+    public static void drawStrikethrough(@Nonnull Matrix4fc matrix, @Nonnull VertexConsumer builder,
                                          float start, float end, float baseline,
                                          int r, int g, int b, int a, int light) {
         baseline += STRIKETHROUGH_OFFSET;
